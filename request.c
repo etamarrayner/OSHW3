@@ -201,6 +201,17 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
     Rio_writen(fd, resp_headers, total_header_len);
     Rio_writen(fd, body_content, body_len);
 
+    //addding to the log if it is a GET method
+    if (strcasecmp(method, "GET") == 0) {
+        char log_entry[MAXLINE];
+
+        // Format a string representing the request.
+        sprintf(log_entry, "Handled GET request for URI: %s\n", uri);
+
+        // Safely push it into the global log using your Reader-Writer locks!
+        add_to_log(log, log_entry, strlen(log_entry));
+    }
+
     if (body_content) {
         free(body_content);
     }
