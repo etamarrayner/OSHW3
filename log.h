@@ -17,7 +17,7 @@ typedef struct server_log* server_log;
 typedef struct log_entry* log_entry;
 
 // Creates a new server log instance
-server_log create_log(int sleep_time);
+server_log create_log(struct timespec sleep_time);
 
 // Destroys and frees the log
 void destroy_log(server_log log);

@@ -113,13 +113,14 @@ void* worker_function(void* arg){
 
 int main(int argc, char *argv[])
 {
-    int listenfd, connfd, TCPport, UDPport, clientlen, log_sleep, NUM_WORKERS, 
+    int listenfd, connfd, TCPport, UDPport, clientlen, NUM_WORKERS, 
         queue_size;
     float f_log_sleep;
     getargs(&TCPport, &UDPport, &NUM_WORKERS, &queue_size, &f_log_sleep, argc, argv);
 
-    log_sleep = (int) f_log_sleep;
-    if(log_sleep < f_log_sleep) log_sleep++;
+    struct timespec sleep_time;
+    sleep_time.tv_sec = (time_t)(f_log_sleep);
+    sleep_time.tv_nsec = (long)(((f_log_sleep) - sleep_time.tv_sec) * 1e9);
 
     busy = (int*)malloc(sizeof(int)*(1+NUM_WORKERS));
     p_queues = malloc(sizeof(UDP_queue)*(1+NUM_WORKERS));
@@ -131,7 +132,7 @@ int main(int argc, char *argv[])
     }
 
     // Create the global server log
-    global_log = create_log(log_sleep);
+    global_log = create_log(sleep_time);
     if (pthread_mutex_init(&lock, NULL) != 0) {
         unix_error("Failed to initialize mutex");
     }

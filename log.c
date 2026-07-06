@@ -2,6 +2,7 @@
 #include <string.h>
 #include "log.h"
 #include <pthread.h>
+#include <sys/time.h>
 
 // Opaque struct definition
 typedef struct log_entry {
@@ -14,7 +15,7 @@ struct server_log {
     log_entry_t* head;
     log_entry_t* tail;
     int curr_size;
-    int sleep_time;
+    struct timespec sleep_time;
 
     //reader-writer lock based on tutorial 8 slides 32-35
     int readers_inside, writers_inside, writers_waiting;
@@ -26,7 +27,7 @@ struct server_log {
 };
 
 // Creates a new server log instance (stub)
-server_log create_log(int sleep_time) {
+server_log create_log(struct timespec sleep_time) {
     // TODO: Allocate and initialize internal log structure
     server_log log = (server_log)malloc(sizeof(struct server_log));
     if(log == NULL){
@@ -112,7 +113,7 @@ int get_log(server_log log, char** dst, time_stats time) {
     // This function should handle concurrent access
     gettimeofday(&time.log_enter, NULL);
     reader_lock(log);
-    if(log->sleep_time > 0) sleep(log->sleep_time);
+    if(log->sleep_time.tv_sec == 0 || log->sleep_time.tv_nsec == 0) nanosleep(&log->sleep_time, NULL);
     gettimeofday(&time.log_exit, NULL);
     int total_log_len = 0;
     log_entry_t* current = log->head;
@@ -145,7 +146,7 @@ void add_to_log(server_log log, time_stats time, threads_stats t) {
     log_entry_t* new_entry = (log_entry_t*)malloc(sizeof(log_entry_t));
     new_entry->next = NULL;
     writer_lock(log);
-    if(log->sleep_time > 0) sleep(log->sleep_time);
+    if(log->sleep_time.tv_sec == 0 || log->sleep_time.tv_nsec == 0) nanosleep(&log->sleep_time, NULL);
     gettimeofday(&(time.log_exit), NULL);
     
     int length = append_job_log(buf, time);
