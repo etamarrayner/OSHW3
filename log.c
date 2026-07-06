@@ -146,6 +146,7 @@ void add_to_log(server_log log, const char* data, int data_len,
     new_entry->next = NULL;
     writer_lock(log);
     if(log->sleep_time > 0) sleep(log->sleep_time);
+    gettimeofday(dispatch_time, NULL);
     if (log->head == NULL) {
         log->head = new_entry;
         log->tail = new_entry;
@@ -155,5 +156,4 @@ void add_to_log(server_log log, const char* data, int data_len,
     }
     log->curr_size++;
     writer_unlock(log);
-    gettimeofday(dispatch_time, NULL);
 }

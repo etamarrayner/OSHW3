@@ -24,18 +24,18 @@ pthread_cond_t cond_not_full;
 
 
 void convert_int(char* str_in, int* num_out){
-    char **bad;
-    long temp = strtol(str_in, bad, 10);
-    if(*str_in == '\0' || **bad != '\0' || temp < 0){
+    char *bad;
+    long temp = strtol(str_in, &bad, 10);
+    if(*str_in == '\0' || *bad != '\0' || temp < 0){
         unix_error("Invalid command line arguments");
     }
     *num_out = temp;
 }
 
 void convert_float(char* str_in, float* num_out){
-    char **bad;
-    long temp = strtof(str_in, bad);
-    if(*str_in == '\0' || **bad != '\0' || temp < 0){
+    char *bad;
+    long temp = strtof(str_in, &bad);
+    if(*str_in == '\0' || *bad != '\0' || temp < 0){
         unix_error("Invalid command line arguments");
     }
     *num_out = temp;
@@ -45,15 +45,29 @@ void convert_float(char* str_in, float* num_out){
 void getargs(int *TCPport, int *UDPport, int *num_workers,
         int *queue_size, float *log_sleep, int argc, char *argv[])
 {
+  	printf("test0.1\n");
+
     if (argc < 6) {
         fprintf(stderr, "Usage: %s <port>\n", argv[0]);
         exit(1);
     }
+      	printf("test0.2\n");
+
     convert_int(argv[1], TCPport);
+    	printf("test0.21\n");
+
     convert_int(argv[2], UDPport);
+      	printf("test0.22\n");
+
     convert_int(argv[3], num_workers);
+      	printf("test0.23\n");
+
     convert_int(argv[4], queue_size);
+      	printf("test0.24\n");
+
     convert_float(argv[5], log_sleep);
+      	printf("test0.3\n");
+
     //convert(argv[5], log_sleep);
     if(*TCPport < 1024 || *UDPport < 1024 || *TCPport == UDPport){
         unix_error("Invalid ports");
@@ -113,10 +127,13 @@ void* worker_function(void* arg){
 
 int main(int argc, char *argv[])
 {
+  	printf("test0\n");
     int listenfd, connfd, TCPport, UDPport, clientlen, log_sleep, NUM_WORKERS, 
         queue_size;
     float f_log_sleep;
     getargs(&TCPport, &UDPport, &NUM_WORKERS, &queue_size, &f_log_sleep, argc, argv);
+    printf("test1\n");
+
     log_sleep = (int) f_log_sleep;
     if(log_sleep < f_log_sleep) log_sleep++;
 

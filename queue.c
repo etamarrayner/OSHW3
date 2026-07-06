@@ -17,7 +17,6 @@ bool isEmpty(CircularQueue *q) {
 
 void enqueue(CircularQueue *q, item value) {
     if (isFull(q)) {
-        printf("Queue is full, cannot enqueue %d\n", value.fd);
         return;
     }
     if (isEmpty(q)) {
@@ -25,12 +24,10 @@ void enqueue(CircularQueue *q, item value) {
     }
     q->rear = (q->rear + 1) % q->MAX_SIZE;
     q->items[q->rear] = value;
-    printf("Enqueued: %d\n", value.fd);
 }
 
 item dequeue(CircularQueue *q) {
     if (isEmpty(q)) {
-        printf("Queue is empty. Cannot dequeue\n");
         return (item){-1,{0}};
     }
     item data = q->items[q->front];
@@ -73,7 +70,6 @@ void enqueueUDP(UDP_queue *q, struct sockaddr_in sock_in){
 
 struct sockaddr_in dequeueUDP(UDP_queue *q){
     if(isUDP_queueEmpty(q)){
-        printf("Queue is empty. Cannot dequeue\n");
         return (struct sockaddr_in){0};
     }
     struct UDP_req *temp_req = q->first;
