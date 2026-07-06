@@ -55,7 +55,7 @@ void getargs(int *TCPport, int *UDPport, int *num_workers,
     convert_int(argv[4], queue_size);
     convert_float(argv[5], log_sleep);
     //convert(argv[5], log_sleep);
-    if(*TCPport < 1024 || *UDPport < 1024 || *TCPport == UDPport){
+    if(*TCPport < 1024 || *UDPport < 1024 || *TCPport == *UDPport){
         unix_error("Invalid ports");
     }
 }
