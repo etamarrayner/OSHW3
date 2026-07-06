@@ -3,6 +3,7 @@
 
 #include<sys/time.h>
 #include<unistd.h>
+#include "request.h"
 // TODO:
 // Implement a thread-safe server log system.
 // - The log should support concurrent access from multiple threads.
@@ -26,7 +27,6 @@ void destroy_log(server_log log);
 int get_log(server_log log, char** dst);
 
 // Appends a new entry to the log
-void add_to_log(server_log log, const char* data, int data_len, 
-    struct timeval *arrival_time, struct timeval *dispatch_time);
+void add_to_log(server_log log, time_stats time, threads_stats t);
 
 #endif // SERVER_LOG_H

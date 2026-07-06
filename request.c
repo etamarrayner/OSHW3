@@ -1,5 +1,6 @@
 #include "segel.h"
 #include "request.h"
+#include "log.h"
 
 // Appends the per-job (timing) statistics to buf.
 int append_job_log(char* buf, time_stats tm_stats) {
@@ -177,6 +178,8 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
             sprintf(resp_headers + strlen(resp_headers), "Server: OS-HW3 Web Server\r\n");
             sprintf(resp_headers + strlen(resp_headers), "Content-Length: %d\r\n", body_len);
             sprintf(resp_headers + strlen(resp_headers), "Content-Type: %s\r\n", filetype);
+
+            add_to_log(log, tm_stats, t_stats);
         } else {
             if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) {
                 requestError(fd, filename, "403", "Forbidden", "OS-HW3 Server could not run this CGI program", tm_stats, t_stats);
@@ -199,17 +202,6 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
     } else {
         requestError(fd, method, "501", "Not Implemented", "OS-HW3 Server does not implement this method", tm_stats, t_stats);
         return;
-    }
-
-    //addding to the log if it is a GET method
-    if (strcasecmp(method, "GET") == 0) {
-        char log_entry[MAXLINE];
-
-        // Format a string representing the request.
-        sprintf(log_entry, "Handled GET request for URI: %s\n", uri);
-
-        // Safely push it into the global log using your Reader-Writer locks!
-        add_to_log(log, log_entry, strlen(log_entry), &tm_stats.log_enter, &tm_stats.log_exit);
     }
 
     // --- SEND ---

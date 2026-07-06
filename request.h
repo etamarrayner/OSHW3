@@ -1,7 +1,9 @@
 #ifndef __REQUEST_H__
 #define __REQUEST_H__
 
-#include "log.h"
+#include<netinet/in.h>
+
+typedef struct server_log* server_log;
 
 typedef struct Threads_stats {
     int id;           // Thread ID

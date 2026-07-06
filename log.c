@@ -135,18 +135,25 @@ int get_log(server_log log, char** dst) {
 }
 
 // Appends a new entry to the log (no-op stub)
-void add_to_log(server_log log, const char* data, int data_len, 
-    struct timeval *arrival_time, struct timeval *dispatch_time) {
-    gettimeofday(arrival_time, NULL);
-    // TODO: Append the provided data to the log
-    // This function should handle concurrent access
+void add_to_log(server_log log, time_stats time, threads_stats t) {
+    gettimeofday(&(time.log_enter), NULL);
+    
+    char *buf[512];
+    buf[0] = '#';
+    buf[1] = '\0';
     log_entry_t* new_entry = (log_entry_t*)malloc(sizeof(log_entry_t));
-    new_entry->data = (char*)malloc(data_len + 1);
-    strcpy(new_entry->data, data);
     new_entry->next = NULL;
     writer_lock(log);
     if(log->sleep_time > 0) sleep(log->sleep_time);
-    gettimeofday(dispatch_time, NULL);
+    gettimeofday(&(time.log_exit), NULL);
+    
+    int length = append_job_log(buf, time);
+    buf[length] = '\0';
+    length = append_thread_log(buf, t);
+    buf[length] = '0';
+    new_entry->data = (char*)malloc(strlen(buf) + 1);
+    strcpy(new_entry->data, buf);
+
     if (log->head == NULL) {
         log->head = new_entry;
         log->tail = new_entry;
