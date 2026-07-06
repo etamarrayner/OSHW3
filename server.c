@@ -29,7 +29,7 @@ void convert_int(char* str_in, int* num_out){
     if(*str_in == '\0' || *bad != '\0' || temp < 0){
         unix_error("Invalid command line arguments");
     }
-    *num_out = temp;
+    *num_out = (int) temp;
 }
 
 void convert_float(char* str_in, float* num_out){
