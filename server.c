@@ -117,6 +117,8 @@ int main(int argc, char *argv[])
         queue_size;
     float f_log_sleep;
     getargs(&TCPport, &UDPport, &NUM_WORKERS, &queue_size, &f_log_sleep, argc, argv);
+    log_sleep = (int) f_log_sleep;
+    if(log_sleep < f_log_sleep) log_sleep++;
 
     busy = (int*)malloc(sizeof(int)*(1+NUM_WORKERS));
     p_queues = malloc(sizeof(UDP_queue)*(1+NUM_WORKERS));
