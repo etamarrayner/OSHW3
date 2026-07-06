@@ -32,7 +32,7 @@ void convert_int(char* str_in, int* num_out){
     *num_out = temp;
 }
 
-void convert_int(char* str_in, float* num_out){
+void convert_float(char* str_in, float* num_out){
     char **bad;
     long temp = strtof(str_in, bad);
     if(*str_in == '\0' || **bad != '\0' || temp < 0){
