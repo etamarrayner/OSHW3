@@ -193,7 +193,7 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
         }
     } else if (strcasecmp(method, "POST") == 0) {
         t_stats->post_req++;
-        body_len = get_log(log, (char**)&body_content);
+        body_len = get_log(log, (char**)&body_content, tm_stats);
 
         sprintf(resp_headers, "HTTP/1.0 200 OK\r\n");
         sprintf(resp_headers + strlen(resp_headers), "Server: OS-HW3 Web Server\r\n");
@@ -215,8 +215,9 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
 }
 
 void UDPHandle(struct sockaddr_in addr_in, threads_stats stats, int udp_fd){
-    char buf[128];
+    char *buf = (char*) malloc(sizeof(char)*128);
     buf[0] = '\0';
     int size = append_thread_log(buf, stats);
     UDP_Write(udp_fd, &addr_in, buf, size);
+    free(buf);
 }

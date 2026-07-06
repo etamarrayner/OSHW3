@@ -107,12 +107,13 @@ void writer_unlock(server_log log) {
 
 
 // Returns dummy log content as string (stub)
-int get_log(server_log log, char** dst) {
+int get_log(server_log log, char** dst, time_stats time) {
     // TODO: Return the full contents of the log as a dynamically allocated string
     // This function should handle concurrent access
-
+    gettimeofday(&time.log_enter, NULL);
     reader_lock(log);
     if(log->sleep_time > 0) sleep(log->sleep_time);
+    gettimeofday(&time.log_exit, NULL);
     int total_log_len = 0;
     log_entry_t* current = log->head;
     while(current != NULL){
@@ -138,7 +139,7 @@ int get_log(server_log log, char** dst) {
 void add_to_log(server_log log, time_stats time, threads_stats t) {
     gettimeofday(&(time.log_enter), NULL);
     
-    char *buf[512];
+    char *buf = (char*) malloc(sizeof(char)*512);
     buf[0] = '#';
     buf[1] = '\0';
     log_entry_t* new_entry = (log_entry_t*)malloc(sizeof(log_entry_t));
@@ -153,7 +154,7 @@ void add_to_log(server_log log, time_stats time, threads_stats t) {
     buf[length] = '0';
     new_entry->data = (char*)malloc(strlen(buf) + 1);
     strcpy(new_entry->data, buf);
-
+    free(buf);
     if (log->head == NULL) {
         log->head = new_entry;
         log->tail = new_entry;
