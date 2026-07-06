@@ -1,6 +1,8 @@
 #ifndef SERVER_LOG_H
 #define SERVER_LOG_H
 
+#include<sys/time.h>
+#include<unistd.h>
 // TODO:
 // Implement a thread-safe server log system.
 // - The log should support concurrent access from multiple threads.
@@ -14,7 +16,7 @@ typedef struct server_log* server_log;
 typedef struct log_entry* log_entry;
 
 // Creates a new server log instance
-server_log create_log();
+server_log create_log(int sleep_time);
 
 // Destroys and frees the log
 void destroy_log(server_log log);
@@ -24,6 +26,7 @@ void destroy_log(server_log log);
 int get_log(server_log log, char** dst);
 
 // Appends a new entry to the log
-void add_to_log(server_log log, const char* data, int data_len);
+void add_to_log(server_log log, const char* data, int data_len, 
+    struct timeval *arrival_time, struct timeval *dispatch_time);
 
 #endif // SERVER_LOG_H

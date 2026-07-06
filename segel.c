@@ -572,9 +572,36 @@ int Open_listenfd(int port)
 /* $begin udp_open */
 int UDP_Open(int port)
 {
-//TODO
+    int rc;
+
+    if((rc = UDP_open(port)) < 0)
+        unix_error("UDP_Open error");
+    return rc;
 }
 /* $end udp_open */
+
+int UDP_open(int port){
+    int udp_fd;
+    struct sockaddr_in serveraddr;
+  
+    //socket
+    if ((udp_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      fprintf(stderr, "socket failed\n");
+      return -1;
+    }
+
+    //bind
+    bzero((char *) &serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET; 
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+    serveraddr.sin_port = htons((unsigned short)port); 
+    if (bind(udp_fd, (SA *)&serveraddr, sizeof(serveraddr)) < 0) {
+      fprintf(stderr, "bind failed\n");
+      return -1;
+    }
+
+    return udp_fd;
+}
 
 int UDP_FillSockAddr(struct sockaddr_in *addr, char *hostname, int port)
 {

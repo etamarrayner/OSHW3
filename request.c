@@ -143,6 +143,7 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE], filetype[MAXLINE];
     rio_t rio;
+    t_stats->total_req++;
 
     void *body_content = NULL;
     int body_len = 0;
@@ -166,6 +167,7 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
                 requestError(fd, filename, "403", "Forbidden", "OS-HW3 Server could not read this file", tm_stats, t_stats);
                 return;
             }
+            t_stats->stat_req++;
             requestGetFiletype(filename, filetype);
             body_len = sbuf.st_size;
             body_content = requestPrepareStatic(filename, body_len);
@@ -180,12 +182,14 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
                 requestError(fd, filename, "403", "Forbidden", "OS-HW3 Server could not run this CGI program", tm_stats, t_stats);
                 return;
             }
+            t_stats->dynm_req++;
             body_content = requestPrepareDynamic(filename, cgiargs, &body_len);
 
             sprintf(resp_headers, "HTTP/1.0 200 OK\r\n");
             sprintf(resp_headers + strlen(resp_headers), "Server: OS-HW3 Web Server\r\n");
         }
     } else if (strcasecmp(method, "POST") == 0) {
+        t_stats->post_req++;
         body_len = get_log(log, (char**)&body_content);
 
         sprintf(resp_headers, "HTTP/1.0 200 OK\r\n");
@@ -196,10 +200,6 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
         requestError(fd, method, "501", "Not Implemented", "OS-HW3 Server does not implement this method", tm_stats, t_stats);
         return;
     }
-    // --- SEND ---
-    int total_header_len = append_stats(resp_headers, t_stats, tm_stats);
-    Rio_writen(fd, resp_headers, total_header_len);
-    Rio_writen(fd, body_content, body_len);
 
     //addding to the log if it is a GET method
     if (strcasecmp(method, "GET") == 0) {
@@ -209,10 +209,22 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
         sprintf(log_entry, "Handled GET request for URI: %s\n", uri);
 
         // Safely push it into the global log using your Reader-Writer locks!
-        add_to_log(log, log_entry, strlen(log_entry));
+        add_to_log(log, log_entry, strlen(log_entry), &tm_stats.log_enter, &tm_stats.log_exit);
     }
+
+    // --- SEND ---
+    int total_header_len = append_stats(resp_headers, t_stats, tm_stats);
+    Rio_writen(fd, resp_headers, total_header_len);
+    Rio_writen(fd, body_content, body_len);
 
     if (body_content) {
         free(body_content);
     }
+}
+
+void UDPHandle(struct sockaddr_in addr_in, threads_stats stats, int udp_fd){
+    char buf[128];
+    buf[0] = '\n';
+    int size = append_thread_log(buf, stats);
+    UDP_Write(udp_fd, &addr_in, buf, size);
 }

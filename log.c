@@ -14,6 +14,7 @@ struct server_log {
     log_entry_t* head;
     log_entry_t* tail;
     int curr_size;
+    int sleep_time;
 
     //reader-writer lock based on tutorial 8 slides 32-35
     int readers_inside, writers_inside, writers_waiting;
@@ -25,7 +26,7 @@ struct server_log {
 };
 
 // Creates a new server log instance (stub)
-server_log create_log() {
+server_log create_log(int sleep_time) {
     // TODO: Allocate and initialize internal log structure
     server_log log = (server_log)malloc(sizeof(struct server_log));
     if(log == NULL){
@@ -34,6 +35,7 @@ server_log create_log() {
     log->head = NULL;
     log->tail = NULL;
     log->curr_size = 0;
+    log->sleep_time = sleep_time;
 
     log->readers_inside = 0;
     log->writers_inside = 0;
@@ -110,7 +112,7 @@ int get_log(server_log log, char** dst) {
     // This function should handle concurrent access
 
     reader_lock(log);
-
+    if(log->sleep_time > 0) sleep(log->sleep_time);
     int total_log_len = 0;
     log_entry_t* current = log->head;
     while(current != NULL){
@@ -133,7 +135,9 @@ int get_log(server_log log, char** dst) {
 }
 
 // Appends a new entry to the log (no-op stub)
-void add_to_log(server_log log, const char* data, int data_len) {
+void add_to_log(server_log log, const char* data, int data_len, 
+    struct timeval *arrival_time, struct timeval *dispatch_time) {
+    gettimeofday(arrival_time, NULL);
     // TODO: Append the provided data to the log
     // This function should handle concurrent access
     log_entry_t* new_entry = (log_entry_t*)malloc(sizeof(log_entry_t));
@@ -141,6 +145,7 @@ void add_to_log(server_log log, const char* data, int data_len) {
     strcpy(new_entry->data, data);
     new_entry->next = NULL;
     writer_lock(log);
+    if(log->sleep_time > 0) sleep(log->sleep_time);
     if (log->head == NULL) {
         log->head = new_entry;
         log->tail = new_entry;
@@ -150,4 +155,5 @@ void add_to_log(server_log log, const char* data, int data_len) {
     }
     log->curr_size++;
     writer_unlock(log);
+    gettimeofday(dispatch_time, NULL);
 }
