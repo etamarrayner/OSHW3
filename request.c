@@ -216,7 +216,7 @@ void requestHandle(int fd, time_stats tm_stats, threads_stats t_stats, server_lo
 
 void UDPHandle(struct sockaddr_in addr_in, threads_stats stats, int udp_fd){
     char buf[128];
-    buf[0] = '\n';
+    buf[0] = '\0';
     int size = append_thread_log(buf, stats);
     UDP_Write(udp_fd, &addr_in, buf, size);
 }
