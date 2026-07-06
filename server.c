@@ -133,8 +133,7 @@ int main(int argc, char *argv[])
     // Create the global server log
     global_log = create_log(log_sleep);
     if (pthread_mutex_init(&lock, NULL) != 0) {
-        perror("Failed to initialize mutex");
-        return 1;
+        unix_error("Failed to initialize mutex");
     }
 
     pthread_cond_init(&cond_not_full, NULL); //guaranteed to succeed and return 0.
@@ -149,8 +148,7 @@ int main(int argc, char *argv[])
 
     for(long i = 0; i < NUM_WORKERS; i++){
         if (pthread_create(&workers[i], NULL, worker_function, (void*)(i + 1)) != 0) {
-            perror("Failed to create thread");
-            return 1;
+            unix_error("Failed to create thread");
         }
     }
 
