@@ -151,7 +151,7 @@ void add_to_log(server_log log, time_stats time, threads_stats t) {
     int length = append_job_log(buf, time);
     buf[length] = '\0';
     length = append_thread_log(buf, t);
-    buf[length] = '0';
+    buf[length] = '\0';
     new_entry->data = (char*)malloc(strlen(buf) + 1);
     strcpy(new_entry->data, buf);
     free(buf);
